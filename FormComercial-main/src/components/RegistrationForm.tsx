@@ -140,7 +140,7 @@ const formSchema = z
     banco: z.string().min(1, "Banco é obrigatório"),
     agencia: z.string().min(1, "Agência é obrigatória"),
     conta: z.string().min(1, "Conta é obrigatória"),
-    tipoConta: z.string().min(1, "Tipo de conta é obrigatório"),
+    tipoConta: z.string().optional(),
 
     // Dados Comerciais
     limiteCredito: z.string().min(1, "Limite de crédito é obrigatório"),
@@ -148,8 +148,8 @@ const formSchema = z
     prazoMedioPagamento: z
       .string()
       .min(1, "Prazo médio de pagamento é obrigatório"),
-    faturamentoMensal: z.string().min(1, "Faturamento mensal é obrigatório"),
-    tempoAtuacao: z.string().min(1, "Tempo de atuação é obrigatório"),
+    faturamentoMensal: z.string().optional(),
+    tempoAtuacao: z.string().optional(),
 
     // Segmento de Vendas
     segmentoVendas: z.array(z.string()).min(1, "Selecione pelo menos um segmento"),
@@ -334,17 +334,16 @@ export default function RegistrationForm() {
         tempoAtuacaoAnos: data.tempoAtuacao,
 
         // 🎯 Segmento de Vendas
-        segVarejo: has(data.segmentoVendas, "Varejo"),
+        segVarejo: has(data.segmentoVendas, "Outros Varejos"),
         segDistribuidor: has(data.segmentoVendas, "Distribuidor"),
         segAtacado: has(data.segmentoVendas, "Atacado"),
-        segKacc: has(data.segmentoVendas, "KACC"),
+        segKacc: has(data.segmentoVendas, "Key Account"),
         segCashCare: has(data.segmentoVendas, "Cash & Care"),
         segCanaisEspeciais: has(data.segmentoVendas, "Canais Especiais"),
 
         // 🏪 Redes
         redeVarejo: has(data.redes, "Varejo"),
         redeDistribuidor: has(data.redes, "Distribuidor"),
-        redeKeyAccount: has(data.redes, "Key Account"),
 
         // 🧾 Dados Fiscais
         regimeTributario: data.regimeTributario,
@@ -1145,7 +1144,7 @@ export default function RegistrationForm() {
                   name="tipoConta"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Tipo de Conta *</FormLabel>
+                      <FormLabel>Tipo de Conta</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
@@ -1264,7 +1263,7 @@ export default function RegistrationForm() {
                   name="prazoMedioPagamento"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Prazo Médio de Pagamento (dias) *</FormLabel>
+                      <FormLabel>Prazo Médio de Pagamento (dias) - Condição de pagamento *</FormLabel>
                       <FormControl>
                         <Input placeholder="30" {...field} />
                       </FormControl>
@@ -1277,7 +1276,7 @@ export default function RegistrationForm() {
                   name="faturamentoMensal"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Faturamento Mensal Médio (R$) *</FormLabel>
+                      <FormLabel>Faturamento Mensal Médio (R$)</FormLabel>
                       <FormControl>
                         <Input placeholder="100.000,00" {...field} />
                       </FormControl>
@@ -1291,7 +1290,7 @@ export default function RegistrationForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        Tempo de Atuação no Mercado (anos) *
+                        Tempo de Atuação no Mercado (anos)
                       </FormLabel>
                       <FormControl>
                         <Input placeholder="10" {...field} />
@@ -1316,12 +1315,12 @@ export default function RegistrationForm() {
                   <FormItem>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                       {[
-                        "Varejo",
                         "Distribuidor",
                         "Atacado",
-                        "KACC",
+                        "Key Account",
                         "Cash & Care",
                         "Canais Especiais",
+                        "Outros Varejos",
                       ].map((item) => (
                         <FormField
                           key={item}
@@ -1377,7 +1376,7 @@ export default function RegistrationForm() {
                 render={() => (
                   <FormItem>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {["Varejo", "Distribuidor", "Key Account"].map((item) => (
+                      {["Varejo", "Distribuidor"].map((item) => (
                         <FormField
                           key={item}
                           control={form.control}
