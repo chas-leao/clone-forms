@@ -135,6 +135,7 @@ const formSchema = z
     // Endereços Adicionais
     enderecoEntregaIgual: z.enum(["sim", "nao"]),
     enderecoCobrancaIgual: z.enum(["sim", "nao"]),
+    anexoEnderecoEntrega: z.array(z.instanceof(File)).optional().default([]),
 
     // Dados Bancários
     banco: z.string().min(1, "Banco é obrigatório"),
@@ -221,10 +222,12 @@ export default function RegistrationForm() {
       segmentoVendas: [],
       redes: [],
       anexos: [],
+      anexoEnderecoEntrega: [],
     },
   });
 
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [uploadedEnderecoEntregaFile, setUploadedEnderecoEntregaFile] = useState<File[]>([]);
 
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
   const ALLOWED_TYPES = [
@@ -272,6 +275,46 @@ export default function RegistrationForm() {
 
     setUploadedFiles(valid);
     form.setValue("anexos", valid, { shouldValidate: true, shouldDirty: true });
+
+    // permite selecionar novamente o mesmo arquivo
+    if (e.target) e.target.value = "";
+  };
+
+  const handleEnderecoEntregaFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target?.files ?? []);
+
+    const valid: File[] = [];
+    const rejected: string[] = [];
+
+    for (const f of files) {
+      const ext = f.name.split(".").pop()?.toLowerCase() ?? "";
+      const typeOk =
+        ALLOWED_TYPES.includes(f.type) || ALLOWED_EXT.includes(ext);
+      const sizeOk = f.size <= MAX_FILE_SIZE;
+
+      if (typeOk && sizeOk) {
+        valid.push(f);
+      } else {
+        const reasons = [
+          !typeOk ? "tipo não permitido" : "",
+          !sizeOk ? "tamanho acima de 5MB" : "",
+        ]
+          .filter(Boolean)
+          .join(" + ");
+        rejected.push(`${f.name} (${reasons})`);
+      }
+    }
+
+    if (rejected.length) {
+      toast?.({
+        title: "Alguns arquivos foram rejeitados",
+        description: rejected.join("\n"),
+        variant: "destructive",
+      });
+    }
+
+    setUploadedEnderecoEntregaFile(valid);
+    form.setValue("anexoEnderecoEntrega", valid, { shouldValidate: true, shouldDirty: true });
 
     // permite selecionar novamente o mesmo arquivo
     if (e.target) e.target.value = "";
@@ -357,7 +400,10 @@ export default function RegistrationForm() {
         website: "",
       };
 
-      const result = await sendToWebhook(payload, uploadedFiles);
+      // Combinar todos os arquivos anexados
+      const allFiles = [...uploadedFiles, ...uploadedEnderecoEntregaFile];
+
+      const result = await sendToWebhook(payload, allFiles);
 
       if (result?.success === false) {
         throw new Error(result.error || "Erro desconhecido");
@@ -370,6 +416,7 @@ export default function RegistrationForm() {
 
       form.reset();
       setUploadedFiles([]);
+      setUploadedEnderecoEntregaFile([]);
     } catch (error) {
       console.error("Error submitting form:", error);
       toast({
@@ -1002,6 +1049,70 @@ export default function RegistrationForm() {
                           <Input id="estado-entrega" placeholder="SP" />
                         </div>
                       </div>
+
+                      {/* Anexo Endereço de Entrega */}
+                      <FormField
+                        control={form.control}
+                        name="anexoEnderecoEntrega"
+                        render={({ field }) => (
+                          <FormItem className="mt-4">
+                            <FormLabel className="flex items-center gap-2">
+                              Anexo - Email com "De Acordo" do Cliente (PDF/DOC/DOCX/PNG/JPG – até 5MB)
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Anexe um email com o "de acordo" do cliente confirmando o endereço de entrega diferente do endereço principal.</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            </FormLabel>
+                            <FormControl>
+                              <input
+                                type="file"
+                                multiple
+                                accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                                onChange={(e) => {
+                                  handleEnderecoEntregaFileUpload(e);
+                                  field.onBlur();
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      {uploadedEnderecoEntregaFile.length > 0 && (
+                        <div className="mt-2">
+                          <ul className="space-y-1">
+                            {uploadedEnderecoEntregaFile.map((file, idx) => (
+                              <li
+                                key={idx}
+                                className="flex items-center justify-between text-sm"
+                              >
+                                <span className="truncate mr-3">{file.name}</span>
+                                <button
+                                  type="button"
+                                  className="text-red-600 hover:underline"
+                                  onClick={() => {
+                                    const arr = [...uploadedEnderecoEntregaFile];
+                                    arr.splice(idx, 1);
+                                    setUploadedEnderecoEntregaFile(arr);
+                                    form.setValue("anexoEnderecoEntrega", arr, {
+                                      shouldValidate: true,
+                                      shouldDirty: true,
+                                    });
+                                  }}
+                                >
+                                  Remover
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
