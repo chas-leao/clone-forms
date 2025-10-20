@@ -150,6 +150,8 @@ const formSchema = z
       .min(1, "Prazo médio de pagamento é obrigatório"),
     faturamentoMensal: z.string().optional(),
     tempoAtuacao: z.string().optional(),
+    grupo: z.string().optional(),
+    observacoes: z.string().optional(),
 
     // Segmento de Vendas
     segmentoVendas: z.array(z.string()).min(1, "Selecione pelo menos um segmento"),
@@ -332,6 +334,8 @@ export default function RegistrationForm() {
         prazoMedioPagamentoDias: data.prazoMedioPagamento,
         faturamentoMensalMedio: data.faturamentoMensal,
         tempoAtuacaoAnos: data.tempoAtuacao,
+        grupo: data.grupo,
+        observacoes: data.observacoes,
 
         // 🎯 Segmento de Vendas
         segVarejo: has(data.segmentoVendas, "Outros Varejos"),
@@ -1194,6 +1198,19 @@ export default function RegistrationForm() {
                 />
                 <FormField
                   control={form.control}
+                  name="grupo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Grupo</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Digite o grupo" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
                   name="anexos"
                   render={({ field }) => (
                     <FormItem>
@@ -1294,6 +1311,23 @@ export default function RegistrationForm() {
                       </FormLabel>
                       <FormControl>
                         <Input placeholder="10" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="observacoes"
+                  render={({ field }) => (
+                    <FormItem className="md:col-span-2">
+                      <FormLabel>Observações</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Digite observações adicionais sobre os dados comerciais"
+                          className="min-h-[100px]"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
