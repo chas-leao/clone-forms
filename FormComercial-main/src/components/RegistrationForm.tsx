@@ -137,6 +137,24 @@ const formSchema = z
     enderecoCobrancaIgual: z.enum(["sim", "nao"]),
     anexoEnderecoEntrega: z.array(z.instanceof(File)).optional().default([]),
 
+    // Endereço de Entrega (quando diferente do principal)
+    cepEntrega: z.string().optional(),
+    numeroEntrega: z.string().optional(),
+    complementoEntrega: z.string().optional(),
+    ruaEntrega: z.string().optional(),
+    bairroEntrega: z.string().optional(),
+    cidadeEntrega: z.string().optional(),
+    estadoEntrega: z.string().optional(),
+
+    // Endereço de Cobrança (quando diferente do principal)
+    cepCobranca: z.string().optional(),
+    numeroCobranca: z.string().optional(),
+    complementoCobranca: z.string().optional(),
+    ruaCobranca: z.string().optional(),
+    bairroCobranca: z.string().optional(),
+    cidadeCobranca: z.string().optional(),
+    estadoCobranca: z.string().optional(),
+
     // Dados Bancários
     banco: z.string().min(1, "Banco é obrigatório"),
     agencia: z.string().min(1, "Agência é obrigatória"),
@@ -175,6 +193,98 @@ const formSchema = z
         message:
           "Obrigatório anexar: Balanço Patrimonial, Contrato Social e Faturamento dos últimos 12 meses (para limites ≥ R$ 20.000,00).",
       });
+    }
+
+    // Validação condicional para Endereço de Entrega
+    if (values.enderecoEntregaIgual === "nao") {
+      if (!values.cepEntrega || values.cepEntrega.replace(/\D/g, "").length < 8) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["cepEntrega"],
+          message: "CEP de entrega é obrigatório",
+        });
+      }
+      if (!values.numeroEntrega || values.numeroEntrega.trim().length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["numeroEntrega"],
+          message: "Número de entrega é obrigatório",
+        });
+      }
+      if (!values.ruaEntrega || values.ruaEntrega.trim().length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["ruaEntrega"],
+          message: "Rua de entrega é obrigatória",
+        });
+      }
+      if (!values.bairroEntrega || values.bairroEntrega.trim().length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["bairroEntrega"],
+          message: "Bairro de entrega é obrigatório",
+        });
+      }
+      if (!values.cidadeEntrega || values.cidadeEntrega.trim().length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["cidadeEntrega"],
+          message: "Cidade de entrega é obrigatória",
+        });
+      }
+      if (!values.estadoEntrega || values.estadoEntrega.trim().length < 2) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["estadoEntrega"],
+          message: "Estado de entrega é obrigatório",
+        });
+      }
+    }
+
+    // Validação condicional para Endereço de Cobrança
+    if (values.enderecoCobrancaIgual === "nao") {
+      if (!values.cepCobranca || values.cepCobranca.replace(/\D/g, "").length < 8) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["cepCobranca"],
+          message: "CEP de cobrança é obrigatório",
+        });
+      }
+      if (!values.numeroCobranca || values.numeroCobranca.trim().length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["numeroCobranca"],
+          message: "Número de cobrança é obrigatório",
+        });
+      }
+      if (!values.ruaCobranca || values.ruaCobranca.trim().length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["ruaCobranca"],
+          message: "Rua de cobrança é obrigatória",
+        });
+      }
+      if (!values.bairroCobranca || values.bairroCobranca.trim().length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["bairroCobranca"],
+          message: "Bairro de cobrança é obrigatório",
+        });
+      }
+      if (!values.cidadeCobranca || values.cidadeCobranca.trim().length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["cidadeCobranca"],
+          message: "Cidade de cobrança é obrigatória",
+        });
+      }
+      if (!values.estadoCobranca || values.estadoCobranca.trim().length < 2) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["estadoCobranca"],
+          message: "Estado de cobrança é obrigatório",
+        });
+      }
     }
   });
 
@@ -365,6 +475,24 @@ export default function RegistrationForm() {
         // ❓ Endereços Adicionais
         entregaIgualPrincipal: data.enderecoEntregaIgual === "sim",
         cobrancaIgualPrincipal: data.enderecoCobrancaIgual === "sim",
+
+        // 📦 Endereço de Entrega (se diferente do principal)
+        enderecoCepEntrega: data.cepEntrega,
+        enderecoNumeroEntrega: data.numeroEntrega,
+        enderecoComplementoEntrega: data.complementoEntrega,
+        enderecoRuaEntrega: data.ruaEntrega,
+        enderecoBairroEntrega: data.bairroEntrega,
+        enderecoCidadeEntrega: data.cidadeEntrega,
+        enderecoUfEntrega: data.estadoEntrega,
+
+        // 💳 Endereço de Cobrança (se diferente do principal)
+        enderecoCepCobranca: data.cepCobranca,
+        enderecoNumeroCobranca: data.numeroCobranca,
+        enderecoComplementoCobranca: data.complementoCobranca,
+        enderecoRuaCobranca: data.ruaCobranca,
+        enderecoBairroCobranca: data.bairroCobranca,
+        enderecoCidadeCobranca: data.cidadeCobranca,
+        enderecoUfCobranca: data.estadoCobranca,
 
         // 🏦 Dados Bancários
         banco: data.banco,
@@ -1001,53 +1129,105 @@ export default function RegistrationForm() {
                     </h4>
                     <div className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                          <Label htmlFor="cep-entrega">CEP *</Label>
-                          <InputMask mask="99999-999">
-                            {(inputProps: any) => (
-                              <Input
-                                {...inputProps}
-                                id="cep-entrega"
-                                placeholder="00000-000"
-                              />
-                            )}
-                          </InputMask>
-                        </div>
-                        <div>
-                          <Label htmlFor="numero-entrega">Número *</Label>
-                          <Input id="numero-entrega" placeholder="123" />
-                        </div>
-                        <div>
-                          <Label htmlFor="complemento-entrega">
-                            Complemento (opcional)
-                          </Label>
-                          <Input
-                            id="complemento-entrega"
-                            placeholder="Apto, Sala, etc."
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="rua-entrega">Rua *</Label>
-                          <Input id="rua-entrega" placeholder="Nome da rua" />
-                        </div>
-                        <div>
-                          <Label htmlFor="bairro-entrega">Bairro *</Label>
-                          <Input
-                            id="bairro-entrega"
-                            placeholder="Nome do bairro"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="cidade-entrega">Cidade *</Label>
-                          <Input
-                            id="cidade-entrega"
-                            placeholder="Nome da cidade"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="estado-entrega">Estado (UF) *</Label>
-                          <Input id="estado-entrega" placeholder="SP" />
-                        </div>
+                        <FormField
+                          control={form.control}
+                          name="cepEntrega"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>CEP *</FormLabel>
+                              <FormControl>
+                                <InputMask
+                                  mask="99999-999"
+                                  value={field.value}
+                                  onChange={field.onChange}
+                                >
+                                  {(inputProps: any) => (
+                                    <Input {...inputProps} placeholder="00000-000" />
+                                  )}
+                                </InputMask>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="numeroEntrega"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Número *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="123" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="complementoEntrega"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Complemento (opcional)</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Apto, Sala, etc." {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="ruaEntrega"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Rua *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Nome da rua" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="bairroEntrega"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Bairro *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Nome do bairro" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="cidadeEntrega"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Cidade *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Nome da cidade" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="estadoEntrega"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Estado (UF) *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="SP" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       </div>
 
                       {/* Anexo Endereço de Entrega */}
@@ -1125,53 +1305,105 @@ export default function RegistrationForm() {
                     </h4>
                     <div className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                          <Label htmlFor="cep-cobranca">CEP *</Label>
-                          <InputMask mask="99999-999">
-                            {(inputProps: any) => (
-                              <Input
-                                {...inputProps}
-                                id="cep-cobranca"
-                                placeholder="00000-000"
-                              />
-                            )}
-                          </InputMask>
-                        </div>
-                        <div>
-                          <Label htmlFor="numero-cobranca">Número *</Label>
-                          <Input id="numero-cobranca" placeholder="123" />
-                        </div>
-                        <div>
-                          <Label htmlFor="complemento-cobranca">
-                            Complemento (opcional)
-                          </Label>
-                          <Input
-                            id="complemento-cobranca"
-                            placeholder="Apto, Sala, etc."
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="rua-cobranca">Rua *</Label>
-                          <Input id="rua-cobranca" placeholder="Nome da rua" />
-                        </div>
-                        <div>
-                          <Label htmlFor="bairro-cobranca">Bairro *</Label>
-                          <Input
-                            id="bairro-cobranca"
-                            placeholder="Nome do bairro"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="cidade-cobranca">Cidade *</Label>
-                          <Input
-                            id="cidade-cobranca"
-                            placeholder="Nome da cidade"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="estado-cobranca">Estado (UF) *</Label>
-                          <Input id="estado-cobranca" placeholder="SP" />
-                        </div>
+                        <FormField
+                          control={form.control}
+                          name="cepCobranca"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>CEP *</FormLabel>
+                              <FormControl>
+                                <InputMask
+                                  mask="99999-999"
+                                  value={field.value}
+                                  onChange={field.onChange}
+                                >
+                                  {(inputProps: any) => (
+                                    <Input {...inputProps} placeholder="00000-000" />
+                                  )}
+                                </InputMask>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="numeroCobranca"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Número *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="123" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="complementoCobranca"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Complemento (opcional)</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Apto, Sala, etc." {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="ruaCobranca"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Rua *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Nome da rua" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="bairroCobranca"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Bairro *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Nome do bairro" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="cidadeCobranca"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Cidade *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Nome da cidade" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="estadoCobranca"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Estado (UF) *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="SP" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       </div>
                     </div>
                   </div>
